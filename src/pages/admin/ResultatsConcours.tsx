@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FileUpload } from '@/components/shared/FileUpload';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { useResultats } from '@/hooks/useResultats';
+import { useResultats } from '@/hooks/useResultatsAdmin';
 import { useConcours } from '@/hooks/useConcours';
 import { useToast } from '@/hooks/use-toast';
 

@@ -57,10 +57,9 @@ export default function GestionConcours() {
         description: newConcours.description,
         date_debut: newConcours.date_debut,
         date_fin: newConcours.date_fin,
-        prix: parseFloat(newConcours.prix),
-        note_deliberation: parseFloat(newConcours.note_deliberation) || 12,
-        statut: "DISPONIBLE",
-      });
+        prix: Number(newConcours.prix),
+        note_deliberation: Number(newConcours.note_deliberation) || 12,
+      });      
 
       setIsDialogOpen(false);
       setNewConcours({ nom: "", description: "", date_debut: "", date_fin: "", prix: "", note_deliberation: "12", statut: "DISPONIBLE" });
@@ -99,10 +98,9 @@ export default function GestionConcours() {
         description: editingConcours.description,
         date_debut: editingConcours.date_debut,
         date_fin: editingConcours.date_fin,
-        prix: parseFloat(editingConcours.prix),
-        note_deliberation: parseFloat(editingConcours.note_deliberation) || 12,
-        statut: editingConcours.statut,
-      });
+        prix: Number(editingConcours.prix),
+        note_deliberation: Number(editingConcours.note_deliberation) || 12,
+      });      
 
       setEditingConcours(null);
 

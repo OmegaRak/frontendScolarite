@@ -23,17 +23,29 @@ import { useAuth } from "@/contexts/AuthContext";
 import { resultatsApi } from "@/lib/api/inscription";
 
 interface SidebarProps {
-  userType: "admin" | "student";
+  userType: "admin" | "student" | "superadmin";
 }
 
 const adminMenuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/admin" },
+  { icon: Upload, label: "Importer Bacheliers", path: "/admin/import-bacheliers" },
   { icon: Trophy, label: "Gestion Concours", path: "/admin/concours" },
   { icon: ClipboardList, label: "Candidatures", path: "/admin/candidatures" },
   { icon: FileText, label: "Résultats Concours", path: "/admin/resultats-concours" },
   { icon: BookOpen, label: "Résultats Examens", path: "/admin/resultats-examens" },
   { icon: Users, label: "Réinscriptions", path: "/admin/reinscriptions" },
-  { icon: Settings, label: "Paramètres", path: "/admin/settings" },
+  { icon: Settings, label: "Paramètres", path: "" },
+];
+
+const superAdminMenuItems = [
+  { icon: LayoutDashboard, label: "Tableau de bord", path: "/superadmin" },
+  { icon: Upload, label: "Importer Bacheliers", path: "/admin/import-bacheliers" },
+  { icon: Trophy, label: "Gestion Concours", path: "/admin/concours" },
+  { icon: ClipboardList, label: "Candidatures", path: "/admin/candidatures" },
+  { icon: FileText, label: "Résultats Concours", path: "/admin/resultats-concours" },
+  { icon: BookOpen, label: "Résultats Examens", path: "/admin/resultats-examens" },
+  { icon: Users, label: "Réinscriptions", path: "/admin/reinscriptions" },
+  { icon: Settings, label: "Paramètres", path: "" },
 ];
 
 // Menu items de base pour les étudiants/candidats
@@ -83,17 +95,21 @@ export function Sidebar({ userType }: SidebarProps) {
 
   // Construire le menu selon le type d'utilisateur et l'éligibilité
   const getMenuItems = () => {
+    if (userType === "superadmin") {
+      return superAdminMenuItems;
+    }
+  
     if (userType === "admin") {
       return adminMenuItems;
     }
-
-    // Pour les étudiants, ajouter réinscription si éligible
+  
     if (showReinscription) {
       return [...baseStudentMenuItems, reinscriptionMenuItem];
     }
-
+  
     return baseStudentMenuItems;
   };
+  
 
   const menuItems = getMenuItems();
 

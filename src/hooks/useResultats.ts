@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import { resultatsApi, ResultatConcours } from '@/lib/api/inscription';
+import { useState, useEffect, useCallback } from "react";
+import { reinscriptionApi, ResultatsMesResultatsResponse, ResultatConcours, ResultatNiveau } from "@/lib/api/reinscription";
 
 export function useResultats() {
-  const [resultats, setResultats] = useState<ResultatConcours[]>([]);
+  const [concours, setConcours] = useState<ResultatConcours | null>(null);
+  const [niveaux, setNiveaux] = useState<ResultatNiveau[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -10,10 +11,13 @@ export function useResultats() {
     try {
       setLoading(true);
       setError(null);
-      const data = await resultatsApi.list();
-      setResultats(data);
+
+      const data: ResultatsMesResultatsResponse = await reinscriptionApi.mesResultats();
+
+      if (data.concours) setConcours(data.concours);
+      if (data.niveaux) setNiveaux(data.niveaux);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement');
+      setError(err instanceof Error ? err.message : "Erreur lors du chargement des résultats");
     } finally {
       setLoading(false);
     }
@@ -23,17 +27,11 @@ export function useResultats() {
     fetchResultats();
   }, [fetchResultats]);
 
-  const importResultats = async (fichier: File) => {
-    const result = await resultatsApi.import(fichier);
-    await fetchResultats(); // Rafraîchir après import
-    return result;
-  };
-
   return {
-    resultats,
+    concours,
+    niveaux,
     loading,
     error,
     refetch: fetchResultats,
-    importResultats,
   };
 }

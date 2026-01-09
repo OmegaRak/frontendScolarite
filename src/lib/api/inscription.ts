@@ -5,6 +5,15 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
 
 // ==================== TYPES ====================
 
+export interface Bachelier {
+  id: number;
+  numero_inscription: string;
+  nom: string;
+  prenom: string;
+  admis: boolean;
+  annee_scolaire: string;
+}
+
 export interface Concours {
   id: number;
   nom: string;
@@ -63,6 +72,36 @@ export interface Etudiant {
   matricule: string;
   statut_reinscription: string;
 }
+
+
+export const bacheliersApi = {
+  list: async (): Promise<Bachelier[]> => {
+    const response = await authFetch('/inscription/bacheliers/');
+    if (response.ok) return response.json();
+    throw new Error('Erreur lors de la récupération des bacheliers');
+  },
+
+  import: async (fichier: File): Promise<{status: string, importes: number, erreurs: string[], resultats: Bachelier[]}> => {
+    const formData = new FormData();
+    formData.append('fichier', fichier);
+
+    const accessToken = tokenStorage.getAccessToken();
+    if (!accessToken) throw new Error('Non authentifié');
+
+    const response = await fetch(`${API_BASE_URL}/inscription/resultats-bac/import/`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Erreur lors de l\'import');
+    }
+
+    return response.json();
+  }
+};
 
 // ==================== API CONCOURS ====================
 

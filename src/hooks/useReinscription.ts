@@ -62,30 +62,33 @@ export const useReinscription = () => {
   }, [fetchAdminWithFilters]);
 
   // ✅ Création par l'étudiant
-  const create = useCallback(async (data: ReinscriptionCreate): Promise<boolean> => {
-    try {
-      setLoading(true);
-      const result = await reinscriptionApi.create(data);
-      
-      toast({
-        title: result.updated ? "Mise à jour réussie" : "Succès",
-        description: result.updated 
-          ? "Votre réinscription a été mise à jour ✅"
-          : "Réinscription envoyée avec succès ✅",
-      });
-      return true;
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Erreur lors de l'envoi de la réinscription",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
+ const create = useCallback(async (data: ReinscriptionCreate): Promise<boolean> => {
+  try {
+    setLoading(true);
+    const result = await reinscriptionApi.create(data);
+    
+    // Le backend retourne un objet avec message, data, et updated
+    const isUpdate = (result as any).updated;
+    
+    toast({
+      title: isUpdate ? "Mise à jour réussie" : "Succès",
+      description: isUpdate 
+        ? "Votre réinscription a été mise à jour ✅"
+        : "Réinscription envoyée avec succès ✅",
+    });
+    return true;
+  } catch (error: any) {
+    console.error("Erreur création réinscription:", error);
+    toast({
+      title: "Erreur",
+      description: error.message || "Erreur lors de l'envoi de la réinscription",
+      variant: "destructive",
+    });
+    return false;
+  } finally {
+    setLoading(false);
+  }
+}, [toast]);
   // ✅ Validation par l'admin
   const updateStatut = useCallback(async (
     id: number,

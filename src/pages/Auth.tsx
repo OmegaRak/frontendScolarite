@@ -19,13 +19,17 @@ const Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && role) {
-      if (role === 'admin') {
+      if (role === 'superadmin') {
+        navigate('/admin');
+      } else if (role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/etudiant');
       }
     }
   }, [isAuthenticated, role, navigate]);
+  
+
   // Login state
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -52,8 +56,6 @@ const Auth = () => {
           title: 'Connexion réussie',
           description: 'Bienvenue dans votre espace personnel',
         });
-        // Redirection selon le rôle récupéré du backend
-        // Le rôle est défini automatiquement par le backend
       } else {
         toast({
           title: 'Erreur de connexion',
@@ -87,14 +89,15 @@ const Auth = () => {
     setIsRegisterLoading(true);
 
     try {
+      // ✅ CORRECTION : Envoyer les données au format attendu par le backend
       const result = await register({
         username: registerUsername,
         email: registerEmail,
-        firstName: registerPrenom,
-        lastName: registerNom,
+        first_name: registerPrenom,  // ← Changé de first_name à first_name
+        last_name: registerNom,      // ← Changé de lastName à last_name
         password: registerPassword,
         password2: registerConfirmPassword,
-        role: 'CANDIDAT',
+        role: 'CANDIDAT',  // ← Le backend attend 'CANDIDAT' en majuscules
       });
       
       if (result.success) {
@@ -102,7 +105,7 @@ const Auth = () => {
           title: 'Inscription réussie',
           description: 'Veuillez vous connecter avec vos identifiants.',
         });
-        // Reset form and switch to login tab
+        // Reset form
         setRegisterUsername('');
         setRegisterEmail('');
         setRegisterPassword('');
@@ -131,13 +134,13 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center p-3 bg-primary rounded-xl mb-4">
-        <img 
-          src={logo} 
-          alt="Logo" 
-          className="w-10 h-10 object-contain"
-        />
-      </div>
+          <div className="inline-flex items-center justify-center p-3 bg-primary rounded-xl mb-4">
+            <img 
+              src={logo} 
+              alt="Logo" 
+              className="w-10 h-10 object-contain"
+            />
+          </div>
 
           <h1 className="text-2xl font-bold text-foreground">Université de Fianarantsoa</h1>
           <p className="text-muted-foreground mt-1">Gestion des Concours et Inscriptions</p>
@@ -284,6 +287,7 @@ const Auth = () => {
                         onChange={(e) => setRegisterPassword(e.target.value)}
                         className="pl-10"
                         required
+                        minLength={8}
                       />
                     </div>
                   </div>
@@ -300,6 +304,7 @@ const Auth = () => {
                         onChange={(e) => setRegisterConfirmPassword(e.target.value)}
                         className="pl-10"
                         required
+                        minLength={8}
                       />
                     </div>
                   </div>

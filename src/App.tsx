@@ -45,42 +45,42 @@ const App = () => (
             
             {/* Admin Routes - Protected */}
             <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                 <AdminDashboard />
               </ProtectedRoute>
             } />
             <Route path="/admin/concours" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                 <GestionConcours />
               </ProtectedRoute>
             } />
             <Route path="/admin/import-bacheliers" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                 <ImportBacheliers />
               </ProtectedRoute>
             } />
             <Route path="/admin/candidatures" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                 <GestionCandidatures />
               </ProtectedRoute>
             } />
             <Route path="/admin/paiements" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                 <GestionPaiements />
               </ProtectedRoute>
             } />
             <Route path="/admin/resultats-concours" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                 <ResultatsConcours />
               </ProtectedRoute>
             } />
             <Route path="/admin/resultats-examens" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                 <ResultatsExamens />
               </ProtectedRoute>
             } />
             <Route path="/admin/reinscriptions" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                 <GestionReinscriptions />
               </ProtectedRoute>
             } />

@@ -23,14 +23,14 @@ export interface UserProfile {
   email: string;
   first_name: string;
   last_name: string;
-  role: 'ADMIN' | 'CANDIDAT' | 'ETUDIANT';
+  role: 'SUPERADMIN' | 'ADMIN' | 'CANDIDAT' | 'ETUDIANT';
   is_active: boolean;
 }
 
 export interface DecodedToken {
   user_id: number;
   username: string;
-  role: 'ADMIN' | 'CANDIDAT' | 'ETUDIANT';
+  role: 'ADMIN' | 'CANDIDAT' | 'ETUDIANT' | 'SUPERADMIN';
   exp: number;
 }
 

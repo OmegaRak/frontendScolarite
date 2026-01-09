@@ -3,7 +3,7 @@ import { Sidebar } from "./Sidebar";
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  userType: "admin" | "student";
+  userType: "admin" | "student" | "superadmin";
 }
 
 export function DashboardLayout({ children, userType }: DashboardLayoutProps) {

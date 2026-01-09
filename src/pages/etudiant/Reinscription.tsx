@@ -1,159 +1,179 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { GraduationCap, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { GraduationCap, CheckCircle } from "lucide-react";
 
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { useReinscription } from '@/hooks/useReinscription';
-import { resultatsApi } from '@/lib/api/inscription';
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useReinscription } from "@/hooks/useReinscription";
+import { ReinscriptionCreate } from "@/lib/api/reinscription";
 
-interface ResultatConcours {
-  id: number;
-  concours: string;
-  utilisateur: string;
-  note: number;
-  date_publication: string;
-  admis: boolean;
+/* =====================================================
+   TYPES
+===================================================== */
+interface LocationState {
+  niveauActuel?: string;
+  niveauVise?: string;
+  concoursId?: number | null;
 }
 
+
+/* =====================================================
+   COMPONENT
+===================================================== */
 const Reinscription = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { create, loading, annees } = useReinscription();
 
-  const [parcoursAdmis, setParcoursAdmis] = useState<ResultatConcours[]>([]);
-  const [concoursMap, setConcoursMap] = useState<Map<string, number>>(new Map());
+  const state = location.state as LocationState | null;
+
+  /* =======================
+     FORM STATE
+  ======================= */
 
   const [formData, setFormData] = useState({
-    nom: '',
-    prenom: '',
-    email: '',
-    niveauActuel: '',
-    niveauVise: '',
-    concoursId: 0,
-    anneeScolaireId: 0,
+    nom: "",
+    prenom: "",
+    email: "",
+    niveau_actuel: state?.niveauActuel || "",
+    niveau_vise: state?.niveauVise || "",
+    concours: state?.concoursId ?? 0, // ✅ ICI
+    annee_scolaire: 0,
   });
-
+  
   const [dossier, setDossier] = useState<File | null>(null);
   const [bordereau, setBordereau] = useState<File | null>(null);
 
-  // ✅ Charger infos utilisateur
+  /* =======================
+     INIT USER DATA
+  ======================= */
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        nom: user.nom || '',
-        prenom: user.prenom || '',
-        email: user.email || '',
+        nom: user.nom || "",
+        prenom: user.prenom || "",
+        email: user.email || "",
       }));
     }
   }, [user]);
 
-  // ✅ Charger les concours où l'utilisateur est admis
+  /* =======================
+     AUTO-SELECT ACTIVE YEAR
+  ======================= */
   useEffect(() => {
-    const loadResultats = async () => {
-      try {
-        const resultats = await resultatsApi.list();
-        const admis = resultats.filter(r => r.admis === true);
-        setParcoursAdmis(admis);
-
-        // Créer une map nom -> ID du concours
-        // Note: nous devons récupérer les IDs des concours depuis l'API
-        // Pour l'instant, on utilise l'ID du résultat comme proxy
-        const map = new Map<string, number>();
-        admis.forEach(r => {
-          map.set(r.concours, r.id); // Vous devrez adapter selon votre structure
-        });
-        setConcoursMap(map);
-      } catch (err) {
-        console.error(err);
-        toast({
-          title: 'Erreur',
-          description: 'Impossible de charger les parcours admis',
-          variant: 'destructive',
-        });
+    if (annees?.length) {
+      const active = annees.find((a) => a.actif);
+      if (active) {
+        setFormData((prev) => ({
+          ...prev,
+          annee_scolaire: active.id,
+        }));
       }
-    };
+    }
+  }, [annees]);
 
-    loadResultats();
-  }, [toast]);
-
-  // ✅ Validation PDF
-  const handleDossierChange = (file: File | null) => {
-    if (file && file.type !== 'application/pdf') {
+  /* =======================
+     FILE VALIDATION
+  ======================= */
+  const handlePdfCheck = (
+    file: File | null,
+    setter: (file: File | null) => void
+  ) => {
+    if (file && file.type !== "application/pdf") {
       toast({
-        title: 'Erreur',
-        description: 'Le dossier doit être en PDF uniquement',
-        variant: 'destructive',
+        title: "Erreur",
+        description: "Le fichier doit être au format PDF",
+        variant: "destructive",
       });
       return;
     }
-    setDossier(file);
+    setter(file);
   };
 
-  const handleBordereauChange = (file: File | null) => {
-    if (file && file.type !== 'application/pdf') {
-      toast({
-        title: 'Erreur',
-        description: 'Le bordereau doit être en PDF uniquement',
-        variant: 'destructive',
-      });
-      return;
-    }
-    setBordereau(file);
-  };
-
-  // ✅ Soumission vers backend
+  /* =======================
+     SUBMIT
+  ======================= */
   const handleSubmit = async () => {
-    // Validation
+    // Vérification des champs obligatoires
+    console.log("📋 Form data before submit:", formData);
+    console.log("📋 Concours value:", formData.concours, "Type:", typeof formData.concours);
+    
     if (
       !formData.nom ||
       !formData.prenom ||
-      !formData.niveauActuel ||
-      !formData.niveauVise ||
-      !formData.concoursId ||
-      !formData.anneeScolaireId ||
+      !formData.niveau_actuel ||
+      !formData.niveau_vise ||
+      !formData.annee_scolaire ||
+      formData.annee_scolaire === 0 ||
       !dossier
     ) {
       toast({
-        title: 'Erreur',
-        description: 'Tous les champs obligatoires doivent être remplis',
-        variant: 'destructive',
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs obligatoires",
+        variant: "destructive",
       });
       return;
     }
 
-    const success = await create({
-      annee_scolaire: formData.anneeScolaireId,
-      niveau_actuel: formData.niveauActuel,
-      niveau_vise: formData.niveauVise,
-      concours: formData.concoursId,
+    // Création du payload - laisser l'API gérer la conversion en FormData
+    const payload: ReinscriptionCreate = {
+      annee_scolaire: formData.annee_scolaire,
+      concours: formData.concours || 0,
+      niveau_actuel: formData.niveau_actuel,
+      niveau_vise: formData.niveau_vise,
       dossier_pdf: dossier,
-      bordereau: bordereau || undefined,
-    });
+    };
+    
+    if (bordereau) {
+      payload.bordereau = bordereau;
+    }
 
-    if (success) {
+    console.log("📤 Payload to send:", payload);
+    console.log("📤 Concours dans payload:", payload.concours);
+
+    try {
+      const success = await create(payload);
+      if (success) {
+        toast({
+          title: "Succès",
+          description: "Réinscription envoyée avec succès ✅",
+        });
+        navigate("/etudiant");
+      }
+    } catch (err: any) {
       toast({
-        title: 'Succès',
-        description: 'Réinscription envoyée avec succès ✅',
+        title: "Erreur",
+        description: err?.message || "Une erreur est survenue",
+        variant: "destructive",
       });
-      navigate('/etudiant');
     }
   };
 
+  /* =======================
+     RENDER
+  ======================= */
   return (
     <DashboardLayout userType="student">
       <div className="max-w-3xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <GraduationCap /> Réinscription
+          <GraduationCap />
+          Réinscription
         </h1>
 
         <Card>
@@ -162,91 +182,63 @@ const Reinscription = () => {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* ✅ Informations personnelles */}
+            {/* NOM / PRENOM */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Nom</Label>
-                <Input
-                  value={formData.nom}
-                  onChange={e => setFormData({ ...formData, nom: e.target.value })}
-                  placeholder="Votre nom"
-                />
+                <Input value={formData.nom} disabled />
               </div>
-
               <div>
                 <Label>Prénom</Label>
-                <Input
-                  value={formData.prenom}
-                  onChange={e => setFormData({ ...formData, prenom: e.target.value })}
-                  placeholder="Votre prénom"
-                />
+                <Input value={formData.prenom} disabled />
               </div>
             </div>
 
+            {/* EMAIL */}
             <div>
               <Label>Email</Label>
-              <Input type="email" value={formData.email} disabled className="bg-gray-50" />
+              <Input value={formData.email} disabled />
             </div>
 
-            {/* ✅ Année scolaire */}
+            {/* ANNEE SCOLAIRE */}
             <div>
               <Label>Année scolaire *</Label>
               <Select
-                onValueChange={value => setFormData({ ...formData, anneeScolaireId: parseInt(value) })}
+                value={String(formData.annee_scolaire)}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    annee_scolaire: Number(value),
+                  }))
+                }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez l'année scolaire" />
+                  <SelectValue placeholder="Sélectionner l'année scolaire" />
                 </SelectTrigger>
+
                 <SelectContent>
-                  {annees.length > 0 ? (
-                    annees
-                      .filter(a => a.actif)
-                      .map(a => (
-                        <SelectItem key={a.id} value={String(a.id)}>
-                          {a.libelle}
-                        </SelectItem>
-                      ))
-                  ) : (
-                    <SelectItem disabled value="none">
-                      Aucune année disponible
+                  {annees?.map((annee) => (
+                    <SelectItem key={annee.id} value={String(annee.id)}>
+                      {annee.libelle}
+                      {annee.actif ? " (active)" : ""}
                     </SelectItem>
-                  )}
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* ✅ Parcours admis - Affiche NOM mais envoie ID */}
-            <div>
-              <Label>Parcours pour lequel vous êtes admis *</Label>
-              <Select
-                onValueChange={value => setFormData({ ...formData, concoursId: parseInt(value) })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez votre parcours admis" />
-                </SelectTrigger>
-                <SelectContent>
-                  {parcoursAdmis.length > 0 ? (
-                    parcoursAdmis.map(p => (
-                      <SelectItem key={p.id} value={String(p.id)}>
-                        {p.concours}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem disabled value="none">
-                      Aucun parcours admis trouvé
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* ✅ Niveaux */}
+            {/* NIVEAUX */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Niveau actuel *</Label>
                 <Input
-                  value={formData.niveauActuel}
-                  onChange={e => setFormData({ ...formData, niveauActuel: e.target.value })}
+                  value={formData.niveau_actuel}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      niveau_actuel: e.target.value,
+                    }))
+                  }
                   placeholder="Ex: L2"
                 />
               </div>
@@ -254,39 +246,45 @@ const Reinscription = () => {
               <div>
                 <Label>Niveau visé *</Label>
                 <Input
-                  value={formData.niveauVise}
-                  onChange={e => setFormData({ ...formData, niveauVise: e.target.value })}
+                  value={formData.niveau_vise}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      niveau_vise: e.target.value,
+                    }))
+                  }
                   placeholder="Ex: L3"
                 />
               </div>
             </div>
 
-            {/* ✅ Dossier PDF obligatoire */}
+            {/* DOSSIER */}
             <div>
               <Label>Dossier complet (PDF obligatoire) *</Label>
               <Input
                 type="file"
                 accept="application/pdf"
-                onChange={e => handleDossierChange(e.target.files?.[0] || null)}
+                onChange={(e) =>
+                  handlePdfCheck(e.target.files?.[0] || null, setDossier)
+                }
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Regroupez tous vos documents en un seul PDF
-              </p>
             </div>
 
-            {/* ✅ Bordereau facultatif */}
+            {/* BORDEREAU */}
             <div>
               <Label>Bordereau de versement (facultatif)</Label>
               <Input
                 type="file"
                 accept="application/pdf"
-                onChange={e => handleBordereauChange(e.target.files?.[0] || null)}
+                onChange={(e) =>
+                  handlePdfCheck(e.target.files?.[0] || null, setBordereau)
+                }
               />
             </div>
 
-            {/* ✅ Bouton soumission */}
+            {/* SUBMIT */}
             <Button onClick={handleSubmit} disabled={loading} className="w-full">
-              {loading ? 'Envoi en cours...' : 'Envoyer la réinscription'}
+              {loading ? "Envoi en cours..." : "Envoyer la réinscription"}
               <CheckCircle className="ml-2 w-4 h-4" />
             </Button>
           </CardContent>

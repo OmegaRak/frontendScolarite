@@ -44,6 +44,41 @@ export interface ReinscriptionFilters {
   search?: string;
 }
 
+export interface ResultatNiveau {
+  id: number;
+  utilisateur: number;
+  utilisateur_nom: string;
+  niveau: number;
+  niveau_nom: string;
+  annee_scolaire: number;
+  annee_libelle: string;
+  moyenne: number;
+  admis: boolean;
+  remarque: string;
+  created_at: string;
+}
+
+export interface ResultatConcours {
+  id: number;
+  concours: number;
+  concours_id: number;
+  concours_nom: string;
+  utilisateur: number;
+  utilisateur_id: number;
+  utilisateur_first_name: string;
+  utilisateur_last_name: string;
+  utilisateur_email: string;
+  note: number;
+  classement?: number;
+  admis: boolean;
+  date_publication: string;
+}
+
+export interface ResultatsMesResultatsResponse {
+  concours?: ResultatConcours;
+  niveaux?: ResultatNiveau[];
+}
+
 export interface ResultatsImportResponse {
   status: string;
   importes: number;
@@ -53,32 +88,40 @@ export interface ResultatsImportResponse {
 
 // ================= API =================
 export const reinscriptionApi = {
-  // Création ou mise à jour réinscription
-  create: async (data: ReinscriptionCreate) => {
-    const formData = new FormData();
-    formData.append("annee_scolaire", String(data.annee_scolaire));
-    formData.append("concours", String(data.concours));
-    formData.append("niveau_actuel", data.niveau_actuel);
-    formData.append("niveau_vise", data.niveau_vise);
-    formData.append("dossier_pdf", data.dossier_pdf);
-    if (data.bordereau) formData.append("bordereau", data.bordereau);
+  // Création ou mise à jour d'une réinscription
+// Création ou mise à jour d'une réinscription
+create: async (data: ReinscriptionCreate): Promise<Reinscription> => {
+  const formData = new FormData();
+  formData.append("annee_scolaire", String(data.annee_scolaire));
+  formData.append("concours", String(data.concours));
+  formData.append("niveau_actuel", data.niveau_actuel);
+  formData.append("niveau_vise", data.niveau_vise);
+  formData.append("dossier_pdf", data.dossier_pdf);
+  if (data.bordereau) formData.append("bordereau", data.bordereau);
 
-    const token = tokenStorage.getAccessToken();
-    if (!token) throw new Error("Non authentifié");
+  const token = tokenStorage.getAccessToken();
+  console.log("🔑 Token présent:", !!token);
+  console.log("🔑 Token value:", token?.substring(0, 20) + "...");
+  
+  if (!token) throw new Error("Non authentifié");
 
-    const res = await fetch(`${API_URL}/reinscription/create/`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
+  const res = await fetch(`${API_URL}/reinscription/create/`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
 
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || "Erreur lors de la création/mise à jour");
-    }
+  console.log("📡 Response status:", res.status);
+  console.log("📡 Response headers:", Object.fromEntries(res.headers.entries()));
 
-    return res.json();
-  },
+  if (!res.ok) {
+    const err = await res.json();
+    console.error("❌ Erreur backend:", err);
+    throw new Error(err.error || "Erreur lors de la création/mise à jour");
+  }
+
+  return res.json();
+},
 
   // Liste admin avec filtres
   listAdmin: async (filters?: ReinscriptionFilters): Promise<Reinscription[]> => {
@@ -96,7 +139,7 @@ export const reinscriptionApi = {
   },
 
   // Validation admin
-  updateStatut: async (id: number, statut: "EN_ATTENTE" | "VALIDEE" | "REFUSEE") => {
+  updateStatut: async (id: number, statut: "EN_ATTENTE" | "VALIDEE" | "REFUSEE"): Promise<Reinscription> => {
     const res = await authFetch(`/reinscription/admin/valider/${id}/`, {
       method: "PUT",
       body: JSON.stringify({ statut }),
@@ -121,7 +164,14 @@ export const reinscriptionApi = {
     return data.niveaux || [];
   },
 
-  // ================= Nouveau API Résultats Excel =================
+  // Récupérer les résultats de l'utilisateur connecté
+  mesResultats: async (): Promise<ResultatsMesResultatsResponse> => {
+    const res = await authFetch("/reinscription/mes-resultats/");
+    if (!res.ok) throw new Error("Erreur lors du chargement des résultats");
+    return res.json();
+  },
+
+  // Importer les résultats Excel
   importResultatsExcel: async (file: File): Promise<ResultatsImportResponse> => {
     if (!file.name.match(/\.(xls|xlsx)$/)) {
       throw new Error("Veuillez sélectionner un fichier Excel (.xls ou .xlsx)");
@@ -146,6 +196,7 @@ export const reinscriptionApi = {
     return res.json();
   },
 
+  // Publier les résultats
   publishResultats: async (niveau: string, annee: string) => {
     const token = tokenStorage.getAccessToken();
     if (!token) throw new Error("Non authentifié");

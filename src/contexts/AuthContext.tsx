@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi, tokenStorage, decodeToken, isTokenExpired, UserProfile } from '@/lib/api';
 
-export type UserRole = 'admin' | 'candidat' | 'etudiant' | null;
+export type UserRole = 'superadmin' | 'admin' | 'candidat' | 'etudiant' | null;
 
 interface User {
   id: string;
@@ -19,8 +19,8 @@ interface AuthContextType {
   register: (data: {
     username: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     password: string;
     password2: string;
     role: 'CANDIDAT' | 'ETUDIANT';
@@ -42,6 +42,8 @@ export const useAuth = () => {
 
 const mapDjangoRoleToLocal = (djangoRole: string): UserRole => {
   switch (djangoRole) {
+    case 'SUPERADMIN':
+      return 'superadmin';
     case 'ADMIN':
       return 'admin';
     case 'CANDIDAT':
@@ -52,6 +54,7 @@ const mapDjangoRoleToLocal = (djangoRole: string): UserRole => {
       return null;
   }
 };
+
 
 const mapProfileToUser = (profile: UserProfile): User => ({
   id: profile.id.toString(),
@@ -126,8 +129,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (data: {
     username: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     password: string;
     password2: string;
     role: 'CANDIDAT' | 'ETUDIANT';
@@ -135,8 +138,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const result = await authApi.register({
       username: data.username,
       email: data.email,
-      first_name: data.firstName,
-      last_name: data.lastName,
+      first_name: data.first_name,
+      last_name: data.last_name,
       password: data.password,
       password2: data.password2,
       role: data.role,
