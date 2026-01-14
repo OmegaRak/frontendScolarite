@@ -20,6 +20,8 @@ import GestionPaiements from "./pages/admin/GestionPaiements";
 import ResultatsConcours from "./pages/admin/ResultatsConcours";
 import ResultatsExamens from "./pages/admin/ResultatsExamens";
 import GestionReinscriptions from "./pages/admin/GestionReinscriptions";
+import GestionEtablissements from "./pages/admin/GestionEtablissements";
+import GestionUtilisateurs from "./pages/admin/GestionUtilisateurs";
 
 // Student Pages
 import EtudiantDashboard from "./pages/etudiant/EtudiantDashboard";
@@ -45,42 +47,52 @@ const App = () => (
             
             {/* Admin Routes - Protected */}
             <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <AdminDashboard />
               </ProtectedRoute>
             } />
+            <Route path="/admin/etablissements" element={
+              <ProtectedRoute allowedRoles={['superadmin']}>
+                <GestionEtablissements />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/utilisateurs" element={
+              <ProtectedRoute allowedRoles={['superadmin']}>
+                <GestionUtilisateurs />
+              </ProtectedRoute>
+            } />
             <Route path="/admin/concours" element={
-              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <GestionConcours />
               </ProtectedRoute>
             } />
             <Route path="/admin/import-bacheliers" element={
-              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <ImportBacheliers />
               </ProtectedRoute>
             } />
             <Route path="/admin/candidatures" element={
-              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <GestionCandidatures />
               </ProtectedRoute>
             } />
             <Route path="/admin/paiements" element={
-              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <GestionPaiements />
               </ProtectedRoute>
             } />
             <Route path="/admin/resultats-concours" element={
-              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <ResultatsConcours />
               </ProtectedRoute>
             } />
             <Route path="/admin/resultats-examens" element={
-              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <ResultatsExamens />
               </ProtectedRoute>
             } />
             <Route path="/admin/reinscriptions" element={
-              <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <GestionReinscriptions />
               </ProtectedRoute>
             } />

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo.png";
 import {
   GraduationCap,
   Users,
@@ -17,35 +16,43 @@ import {
   Menu,
   X,
   LogOut,
+  Building2,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { resultatsApi } from "@/lib/api/inscription";
 
 interface SidebarProps {
-  userType: "admin" | "student" | "superadmin";
+  userType: "admin" | "student";
 }
 
+// Menu SuperAdmin (gestion globale)
+const superAdminMenuItems = [
+  { icon: LayoutDashboard, label: "Tableau de bord", path: "/admin" },
+  { icon: Building2, label: "Établissements", path: "/admin/etablissements" },
+  { icon: Shield, label: "Utilisateurs", path: "/admin/utilisateurs" },
+  { icon: Upload, label: "Importer Bacheliers", path: "/admin/import-bacheliers" },
+  { icon: Trophy, label: "Gestion Concours", path: "/admin/concours" },
+  { icon: ClipboardList, label: "Candidatures", path: "/admin/candidatures" },
+  { icon: Receipt, label: "Reçus & Paiements", path: "/admin/paiements" },
+  { icon: FileText, label: "Résultats Concours", path: "/admin/resultats-concours" },
+  { icon: BookOpen, label: "Résultats Examens", path: "/admin/resultats-examens" },
+  { icon: Users, label: "Réinscriptions", path: "/admin/reinscriptions" },
+  { icon: Settings, label: "Paramètres", path: "/admin/settings" },
+];
+
+// Menu Admin d'établissement
 const adminMenuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/admin" },
   { icon: Upload, label: "Importer Bacheliers", path: "/admin/import-bacheliers" },
   { icon: Trophy, label: "Gestion Concours", path: "/admin/concours" },
   { icon: ClipboardList, label: "Candidatures", path: "/admin/candidatures" },
+  { icon: Receipt, label: "Reçus & Paiements", path: "/admin/paiements" },
   { icon: FileText, label: "Résultats Concours", path: "/admin/resultats-concours" },
   { icon: BookOpen, label: "Résultats Examens", path: "/admin/resultats-examens" },
   { icon: Users, label: "Réinscriptions", path: "/admin/reinscriptions" },
-  { icon: Settings, label: "Paramètres", path: "" },
-];
-
-const superAdminMenuItems = [
-  { icon: LayoutDashboard, label: "Tableau de bord", path: "/superadmin" },
-  { icon: Upload, label: "Importer Bacheliers", path: "/admin/import-bacheliers" },
-  { icon: Trophy, label: "Gestion Concours", path: "/admin/concours" },
-  { icon: ClipboardList, label: "Candidatures", path: "/admin/candidatures" },
-  { icon: FileText, label: "Résultats Concours", path: "/admin/resultats-concours" },
-  { icon: BookOpen, label: "Résultats Examens", path: "/admin/resultats-examens" },
-  { icon: Users, label: "Réinscriptions", path: "/admin/reinscriptions" },
-  { icon: Settings, label: "Paramètres", path: "" },
+  { icon: Settings, label: "Paramètres", path: "/admin/settings" },
 ];
 
 // Menu items de base pour les étudiants/candidats
@@ -53,6 +60,7 @@ const baseStudentMenuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/etudiant" },
   { icon: Trophy, label: "Concours Disponibles", path: "/etudiant/concours" },
   { icon: ClipboardList, label: "Mes Candidatures", path: "/etudiant/candidatures" },
+  { icon: CreditCard, label: "Paiements", path: "/etudiant/paiements" },
   { icon: FileText, label: "Mes Résultats", path: "/etudiant/resultats" },
 ];
 
@@ -95,21 +103,22 @@ export function Sidebar({ userType }: SidebarProps) {
 
   // Construire le menu selon le type d'utilisateur et l'éligibilité
   const getMenuItems = () => {
-    if (userType === "superadmin") {
-      return superAdminMenuItems;
-    }
-  
     if (userType === "admin") {
+      // SuperAdmin voit tout
+      if (role === 'superadmin') {
+        return superAdminMenuItems;
+      }
+      // Admin d'établissement
       return adminMenuItems;
     }
-  
+
+    // Pour les étudiants, ajouter réinscription si éligible
     if (showReinscription) {
       return [...baseStudentMenuItems, reinscriptionMenuItem];
     }
-  
+
     return baseStudentMenuItems;
   };
-  
 
   const menuItems = getMenuItems();
 
@@ -143,20 +152,16 @@ export function Sidebar({ userType }: SidebarProps) {
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-6 border-b border-sidebar-border">
-            <img 
-              src={logo} 
-              alt="Logo" 
-              className="h-10 w-10 object-contain rounded-md"
-            />
-
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary">
+              <GraduationCap className="h-6 w-6 text-sidebar-primary-foreground" />
+            </div>
             <div>
-              <h1 className="font-display font-bold text-sidebar-foreground">Université de Fianarantsoa</h1>
+              <h1 className="font-display font-bold text-sidebar-foreground">UniPortal</h1>
               <p className="text-xs text-sidebar-foreground/60">
                 {userType === "admin" ? "Administration" : "Espace Étudiant"}
               </p>
             </div>
           </div>
-
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">

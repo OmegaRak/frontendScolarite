@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authApi, tokenStorage, decodeToken, isTokenExpired, UserProfile } from '@/lib/api';
+import { authApi, tokenStorage, decodeToken, isTokenExpired, UserProfile, Etablissement } from '@/lib/api';
 
 export type UserRole = 'superadmin' | 'admin' | 'candidat' | 'etudiant' | null;
 
@@ -10,6 +10,8 @@ interface User {
   prenom: string;
   username: string;
   role: UserRole;
+  etablissement?: number;
+  etablissement_details?: Etablissement;
 }
 
 interface AuthContextType {
@@ -19,8 +21,8 @@ interface AuthContextType {
   register: (data: {
     username: string;
     email: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     password: string;
     password2: string;
     role: 'CANDIDAT' | 'ETUDIANT';
@@ -55,7 +57,6 @@ const mapDjangoRoleToLocal = (djangoRole: string): UserRole => {
   }
 };
 
-
 const mapProfileToUser = (profile: UserProfile): User => ({
   id: profile.id.toString(),
   email: profile.email,
@@ -63,6 +64,8 @@ const mapProfileToUser = (profile: UserProfile): User => ({
   prenom: profile.first_name,
   username: profile.username,
   role: mapDjangoRoleToLocal(profile.role),
+  etablissement: profile.etablissement,
+  etablissement_details: profile.etablissement_details,
 });
 
 interface AuthProviderProps {
@@ -129,8 +132,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (data: {
     username: string;
     email: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     password: string;
     password2: string;
     role: 'CANDIDAT' | 'ETUDIANT';
@@ -138,8 +141,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const result = await authApi.register({
       username: data.username,
       email: data.email,
-      first_name: data.first_name,
-      last_name: data.last_name,
+      first_name: data.firstName,
+      last_name: data.lastName,
       password: data.password,
       password2: data.password2,
       role: data.role,

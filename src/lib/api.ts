@@ -1,10 +1,17 @@
 // Configuration API Django
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 // Types
 export interface LoginResponse {
   access: string;
   refresh: string;
+}
+
+export interface Etablissement {
+  id: number;
+  code: string;
+  nom: string;
+  ville: string;
 }
 
 export interface RegisterData {
@@ -14,7 +21,8 @@ export interface RegisterData {
   last_name: string;
   password: string;
   password2: string;
-  role: 'ADMIN' | 'CANDIDAT' | 'ETUDIANT';
+  role: 'SUPERADMIN' | 'ADMIN' | 'CANDIDAT' | 'ETUDIANT';
+  code_etablissement?: string;
 }
 
 export interface UserProfile {
@@ -25,12 +33,16 @@ export interface UserProfile {
   last_name: string;
   role: 'SUPERADMIN' | 'ADMIN' | 'CANDIDAT' | 'ETUDIANT';
   is_active: boolean;
+  etablissement?: number;
+  etablissement_details?: Etablissement;
 }
 
 export interface DecodedToken {
   user_id: number;
   username: string;
-  role: 'ADMIN' | 'CANDIDAT' | 'ETUDIANT' | 'SUPERADMIN';
+  role: 'SUPERADMIN' | 'ADMIN' | 'CANDIDAT' | 'ETUDIANT';
+  etablissement_id?: number;
+  etablissement_code?: string;
   exp: number;
 }
 
