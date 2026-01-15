@@ -35,11 +35,10 @@ const superAdminMenuItems = [
   { icon: Upload, label: "Importer Bacheliers", path: "/admin/import-bacheliers" },
   { icon: Trophy, label: "Gestion Concours", path: "/admin/concours" },
   { icon: ClipboardList, label: "Candidatures", path: "/admin/candidatures" },
-  { icon: Receipt, label: "Reçus & Paiements", path: "/admin/paiements" },
   { icon: FileText, label: "Résultats Concours", path: "/admin/resultats-concours" },
   { icon: BookOpen, label: "Résultats Examens", path: "/admin/resultats-examens" },
   { icon: Users, label: "Réinscriptions", path: "/admin/reinscriptions" },
-  { icon: Settings, label: "Paramètres", path: "/admin/settings" },
+  { icon: Settings, label: "Paramètres", path: "" },
 ];
 
 // Menu Admin d'établissement
@@ -48,11 +47,10 @@ const adminMenuItems = [
   { icon: Upload, label: "Importer Bacheliers", path: "/admin/import-bacheliers" },
   { icon: Trophy, label: "Gestion Concours", path: "/admin/concours" },
   { icon: ClipboardList, label: "Candidatures", path: "/admin/candidatures" },
-  { icon: Receipt, label: "Reçus & Paiements", path: "/admin/paiements" },
   { icon: FileText, label: "Résultats Concours", path: "/admin/resultats-concours" },
   { icon: BookOpen, label: "Résultats Examens", path: "/admin/resultats-examens" },
   { icon: Users, label: "Réinscriptions", path: "/admin/reinscriptions" },
-  { icon: Settings, label: "Paramètres", path: "/admin/settings" },
+  { icon: Settings, label: "Paramètres", path: "" },
 ];
 
 // Menu items de base pour les étudiants/candidats
@@ -60,7 +58,6 @@ const baseStudentMenuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/etudiant" },
   { icon: Trophy, label: "Concours Disponibles", path: "/etudiant/concours" },
   { icon: ClipboardList, label: "Mes Candidatures", path: "/etudiant/candidatures" },
-  { icon: CreditCard, label: "Paiements", path: "/etudiant/paiements" },
   { icon: FileText, label: "Mes Résultats", path: "/etudiant/resultats" },
 ];
 
@@ -156,7 +153,7 @@ export function Sidebar({ userType }: SidebarProps) {
               <GraduationCap className="h-6 w-6 text-sidebar-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-display font-bold text-sidebar-foreground">UniPortal</h1>
+              <h1 className="font-display font-bold text-sidebar-foreground">Unmiversité de Fianarantsoa</h1>
               <p className="text-xs text-sidebar-foreground/60">
                 {userType === "admin" ? "Administration" : "Espace Étudiant"}
               </p>
