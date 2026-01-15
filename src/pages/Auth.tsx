@@ -93,8 +93,8 @@ const Auth = () => {
       const result = await register({
         username: registerUsername,
         email: registerEmail,
-        first_name: registerPrenom,  // ← Changé de first_name à first_name
-        last_name: registerNom,      // ← Changé de lastName à last_name
+        firstName: registerPrenom,  // ← Changé de first_name à first_name
+        lastName: registerNom,      // ← Changé de lastName à last_name
         password: registerPassword,
         password2: registerConfirmPassword,
         role: 'CANDIDAT',  // ← Le backend attend 'CANDIDAT' en majuscules

@@ -20,8 +20,8 @@ import GestionPaiements from "./pages/admin/GestionPaiements";
 import ResultatsConcours from "./pages/admin/ResultatsConcours";
 import ResultatsExamens from "./pages/admin/ResultatsExamens";
 import GestionReinscriptions from "./pages/admin/GestionReinscriptions";
-import GestionEtablissements from "./pages/admin/GestionEtablissements";
-import GestionUtilisateurs from "./pages/admin/GestionUtilisateurs";
+//import GestionEtablissements from "./pages/admin/GestionEtablissements";
+//import GestionUtilisateurs from "./pages/admin/GestionUtilisateurs";
 
 // Student Pages
 import EtudiantDashboard from "./pages/etudiant/EtudiantDashboard";
@@ -51,7 +51,7 @@ const App = () => (
                 <AdminDashboard />
               </ProtectedRoute>
             } />
-            <Route path="/admin/etablissements" element={
+            {/*0 <Route path="/admin/etablissements" element={
               <ProtectedRoute allowedRoles={['superadmin']}>
                 <GestionEtablissements />
               </ProtectedRoute>
@@ -60,7 +60,7 @@ const App = () => (
               <ProtectedRoute allowedRoles={['superadmin']}>
                 <GestionUtilisateurs />
               </ProtectedRoute>
-            } />
+            } /> */}
             <Route path="/admin/concours" element={
               <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <GestionConcours />
