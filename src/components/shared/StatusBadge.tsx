@@ -24,7 +24,7 @@ interface StatusBadgeProps {
 }
 
 const statusConfig: Record<StatusType, { label: string; className: string }> = {
-  'en_attente_paiement': { label: 'En attente de paiement', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+  'en_attente_paiement': { label: 'En attente', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
   'paiement_en_validation': { label: 'en entente', className: 'bg-orange-100 text-orange-800 border-orange-200' },
   'validee': { label: 'Validée', className: 'bg-green-100 text-green-800 border-green-200' },
   'rejetee': { label: 'Rejetée', className: 'bg-red-100 text-red-800 border-red-200' },
